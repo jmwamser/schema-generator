@@ -64,9 +64,26 @@ final class SchemaGeneratorConfiguration implements ConfigurationInterface
 
         $treeBuilder = new TreeBuilder('config');
 
-        $treeBuilder
+        $tree = $treeBuilder
             ->getRootNode()
-            ->children()
+            ->children();
+        if (version_compare(PHP_VERSION, '8.1', '>=')) {
+            $tree
+                ->arrayNode('customEnum')
+                    ->info('configure non-default enum types, different than the PHP Enum core.')
+                    ->canBeDisabled()
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('class')
+                            ->defaultValue('MyCLabs\Enum\Enum')
+                            ->validate()
+                                ->ifNotInArray(['MyCLabs\Enum\Enum',])
+                                ->thenInvalid('Invalid customer Enum configuration class, %s')
+                        ->end()
+                    ->end()
+                ->end();
+        }
+        $tree
                 ->arrayNode('openApi')
                     ->addDefaultsIfNotSet()
                     ->children()
