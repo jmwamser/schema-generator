@@ -470,6 +470,26 @@ PHP
         $this->assertStringNotContainsString('function setId(', $gender);
     }
 
+    public function testGeneratedEnum81(): void
+    {
+        $outputDir = __DIR__.'/../../build/enum';
+        $config = __DIR__.'/../config/enum-81.yaml';
+
+        $this->fs->mkdir($outputDir);
+
+        $commandTester = new CommandTester(new GenerateCommand());
+        $this->assertEquals(0, $commandTester->execute(['output' => $outputDir, 'config' => $config]));
+
+        $gender = file_get_contents("$outputDir/App/Enum/GenderType.php");
+
+        $this->assertStringContainsString(<<<'PHP'
+    case FEMALE = 'https://schema.org/Female';
+PHP
+            , $gender);
+
+        $this->assertStringNotContainsString('function setId(', $gender);
+    }
+
     public function testSupersededProperties(): void
     {
         $outputDir = __DIR__.'/../../build/superseded-properties';
