@@ -72,7 +72,6 @@ final class SchemaGeneratorConfiguration implements ConfigurationInterface
                 ->arrayNode('customEnum')
                     ->info('configure non-default enum types, different than the PHP Enum core.')
                     ->canBeDisabled()
-                    ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('class')
                             ->defaultValue('MyCLabs\Enum\Enum')

@@ -266,7 +266,7 @@ class TypesGenerator
                 $this->phpTypeConverter,
                 $graphs,
                 $config['namespaces']['enum']
-            ))($class, []);
+            ))($class, ['customEnum'=> $config['customEnum']]);
         } else {
             $class->namespace = $typeConfig['namespaces']['class'] ?? $config['namespaces']['entity'];
 

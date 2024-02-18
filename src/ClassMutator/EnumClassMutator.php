@@ -35,9 +35,17 @@ abstract class EnumClassMutator implements ClassMutatorInterface
     public function __invoke(Class_ $class, array $context): void
     {
         $class->namespace = $this->desiredNamespace;
-        $class
-            ->withParent('Enum')
-            ->addUse(new Use_(Enum::class));
+        if (
+            (
+                is_array($context['customEnum']) && array_key_exists('enabled',$context['customEnum'])
+                && $context['customEnum']['enabled']
+            )
+            || version_compare(PHP_VERSION, '8.1', '<')
+        ) {
+            $class
+                ->withParent('Enum')
+                ->addUse(new Use_(Enum::class));
+        }
 
         $this->addEnumConstants($class);
     }

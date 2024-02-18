@@ -15,6 +15,7 @@ namespace ApiPlatform\SchemaGenerator\Model;
 
 use MyCLabs\Enum\Enum as MyCLabsEnum;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\EnumType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
@@ -216,6 +217,15 @@ abstract class Class_
      */
     public function toNetteFile(array $config, InflectorInterface $inflector, PhpFile $file = null): PhpFile
     {
+        $customEnum = false;
+        if (
+            is_array($config['customEnum']) && array_key_exists('enabled',$config['customEnum'])
+            && $config['customEnum']['enabled']
+
+        ) {
+            $customEnum = $config['customEnum']['class'];
+        }
+
         $useDoctrineCollections = $config['doctrine']['useCollection'];
         $useAccessors = $config['accessorMethods'];
         $useFluentMutators = $config['fluentMutatorMethods'];
@@ -235,6 +245,47 @@ abstract class Class_
 
         foreach ($this->uses as $use) {
             $namespace->addUse($use->name(), $use->alias());
+        }
+
+
+        if (
+            false === $customEnum
+//            && version_compare(PHP_VERSION, '8.1', '>=')
+        ) {
+            $file = new PhpFile();
+            $enum = $file
+                ->addEnum($this->name)
+            ;
+
+            foreach ($this->constants as $case) {
+                $constant = $case->toNetteConstant();
+                $enum->addCase(
+                    $constant->getName(),
+                    $constant->getValue()
+                );
+            }
+
+//            $netteAttributes = $class->getAttributes();
+//            foreach ($this->attributes as $attribute) {
+//                $hasAttribute = false;
+//                foreach ($class->getAttributes() as $netteAttribute) {
+//                    if ($netteAttribute->getName() === $this->resolveName($namespace, $attribute->name())) {
+//                        $hasAttribute = true;
+//                    }
+//                }
+//                if (!$hasAttribute) {
+//                    $netteAttributes[] = $attribute->toNetteAttribute($namespace);
+//                }
+//            }
+//            $class->setAttributes($netteAttributes);
+//
+//            if (!$class->getComment()) {
+//                foreach ($this->annotations as $annotation) {
+//                    $class->addComment($annotation);
+//                }
+//            }
+
+            return $file;
         }
 
         /** @var ?ClassType $class */
@@ -277,7 +328,7 @@ abstract class Class_
         if ($this->parent() && !$class->getExtends()) {
             $parentExtend = $this->resolveName($namespace, $this->parent());
             if ($this->isParentEnum()) {
-                $parentExtend = MyCLabsEnum::class;
+                $parentExtend = $customEnum;
             }
 
             $class->setExtends($parentExtend);
